@@ -54,6 +54,8 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
                   await raffle.enterRaffle({ value: raffleEntranceFee })
                   // for a documentation of the methods below, go here: https://hardhat.org/hardhat-network/reference
                   await network.provider.send("evm_increaseTime", [interval.toNumber() + 1])
+                  // these are 2 types of how we can call the special/debugging methods of Hardhat
+                  //these are obviously only possible on hre 
                   await network.provider.request({ method: "evm_mine", params: [] })
                   // we pretend to be a keeper for a second
                   await raffle.performUpkeep([]) // changes the state to calculating for our comparison below
@@ -98,11 +100,12 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
               it("can only run if checkupkeep is true", async () => {
                   await raffle.enterRaffle({ value: raffleEntranceFee })
                   await network.provider.send("evm_increaseTime", [interval.toNumber() + 1])
-                  await network.provider.request({ method: "evm_mine", params: [] })
+                  await network.provider.send("evm_mine", [] )
+                //   await network.provider.request({ method: "evm_mine", params: [] })
                   const tx = await raffle.performUpkeep("0x") 
                   assert(tx)
               })
-              it("reverts if checkup is false", async () => {
+              it("reverts if checkupKeep is false", async () => {
                   await expect(raffle.performUpkeep("0x")).to.be.revertedWith( 
                       "Raffle__UpkeepNotNeeded"
                   )
@@ -115,6 +118,9 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
                   const txResponse = await raffle.performUpkeep("0x") // emits requestId
                   const txReceipt = await txResponse.wait(1) // waits 1 block
                   const raffleState = await raffle.getRaffleState() // updates state
+                  console.log(txReceipt.logs);
+                //here we are using the events[1] bcoz, before our event, the coordinator also emits an event, so here we are 
+                //accessing our event by using events[1]
                   const requestId = txReceipt.events[1].args.requestId
                   assert(requestId.toNumber() > 0)
                   assert(raffleState == 1) // 0 = open, 1 = calculating
@@ -145,8 +151,8 @@ const { developmentChains, networkConfig } = require("../../helper-hardhat-confi
                   const additionalEntrances = 3 // to test
                   const startingIndex = 2
                   for (let i = startingIndex; i < startingIndex + additionalEntrances; i++) { // i = 2; i < 5; i=i+1
-                      raffle = raffleContract.connect(accounts[i]) // Returns a new instance of the Raffle contract connected to player
-                      await raffle.enterRaffle({ value: raffleEntranceFee })
+                    //   raffle = raffleContract.connect(accounts[i]) // Returns a new instance of the Raffle contract connected to player
+                      await raffle.connect(accounts[i]).enterRaffle({ value: raffleEntranceFee })
                   }
                   const startingTimeStamp = await raffle.getLastTimeStamp() // stores starting timestamp (before we fire our event)
 

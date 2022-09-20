@@ -131,7 +131,7 @@ contract Raffle is VRFConsumerBaseV2, KeeperCompatibleInterface {
             i_callbackGasLimit,
             NUM_WORDS
         );
-        // Quiz... is this redundant?
+        // this is redundant, bcoz the co-ordinator itself emits an event, from which we could have got the request ID
         emit RequestedRaffleWinner(requestId);
     }
 

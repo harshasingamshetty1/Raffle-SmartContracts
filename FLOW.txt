@@ -1,0 +1,7 @@
+For performing the Staging tests on Test Network (Goerli)
+ 
+1. Create a SubscriptionID and Fund It, and update the helper-hardhat config with the new subId
+2. Deploy the contracts on Goerli with the updated SubscriptionID
+3. Register the contract to the VRF subscription as a Consumer.
+4. Register the contract with Keepers
+5. perform the staging test on Goerli
